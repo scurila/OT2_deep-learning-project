@@ -4,7 +4,7 @@ from net import Net
 import torchvision
 import torchvision.transforms as transforms
 
-PATH = './net_1.pth'
+PATH = './net_2.pth'
 
 net = Net()
 net.load_state_dict(torch.load(PATH))

@@ -3,6 +3,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
+from torchsampler import ImbalancedDatasetSampler
 
 import torch.optim as optim
 import torch.nn as nn
@@ -36,7 +37,11 @@ train_sampler = SubsetRandomSampler(train_new_idx)
 valid_sampler = SubsetRandomSampler(valid_idx)
 
 # Dataloaders (take care of loading the data from disk, batch by batch, during training)
+# 1st try
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=1)
+# 2nd try
+train_loader_balanced = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=ImbalancedDatasetSampler(train_data), num_workers=1)
+
 valid_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=valid_sampler, num_workers=1)
 test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=1)
 
@@ -58,7 +63,7 @@ print_every_n_batch = 200
 for epoch in range(1, n_epochs+1):  # loop over the dataset multiple times
 
     running_loss = 0.0
-    for data, target in train_loader:
+    for data, target in train_loader_balanced:
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -77,5 +82,5 @@ for epoch in range(1, n_epochs+1):  # loop over the dataset multiple times
 
 print('Finished Training')
 
-PATH = './net_1.pth'
+PATH = './net_2.pth'
 torch.save(net.state_dict(), PATH)
