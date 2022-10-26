@@ -4,6 +4,11 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 
+import torch.optim as optim
+import torch.nn as nn
+import torch.nn.functional as F
+from net import Net
+
 train_dir = './train_images'    # folder containing training images
 test_dir = './test_images'    # folder containing test images
 
@@ -37,10 +42,40 @@ test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuf
 
 classes = ('noface','face')  # indicates that "1" means "face" and "0" non-face (only used for display)
 
+# CNN
+
+net = Net()
+print(net)
+
+# Loss function and Optimiser (Cross-entropy loss and SGD with momentum)
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+
 # Training 
+n_epochs = 1 # number of epochs
+i = 0 # number of iterations
+print_every_n_batch = 200
+for epoch in range(1, n_epochs+1):  # loop over the dataset multiple times
 
-# loop over epochs: one epoch = one pass through the whole training dataset
-# for epoch in range(1, n_epochs+1):  
-#   loop over iterations: one iteration = 1 batch of examples
-#   for data, target in train_loader:   
+    running_loss = 0.0
+    for data, target in train_loader:
 
+        # zero the parameter gradients
+        optimizer.zero_grad()
+
+        # forward + backward + optimize
+        outputs = net(data)
+        loss = criterion(outputs, target)
+        loss.backward()
+        optimizer.step()
+
+        running_loss += loss.item()
+        if i % print_every_n_batch == print_every_n_batch - 1:
+            print(f'[{epoch}, {i + 1:5d}] loss: {running_loss / print_every_n_batch:.3f}')
+            running_loss = 0.0
+        i += 1
+
+print('Finished Training')
+
+PATH = './net_1.pth'
+torch.save(net.state_dict(), PATH)
