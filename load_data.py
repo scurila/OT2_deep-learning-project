@@ -54,16 +54,17 @@ print(net)
 
 # Loss function and Optimiser (Cross-entropy loss and SGD with momentum)
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
+# optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 # Training 
-n_epochs = 1 # number of epochs
+n_epochs = 3 # number of epochs
 i = 0 # number of iterations
 print_every_n_batch = 200
 for epoch in range(1, n_epochs+1):  # loop over the dataset multiple times
 
     running_loss = 0.0
-    for data, target in train_loader_balanced:
+    for data, target in train_loader:
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -82,5 +83,5 @@ for epoch in range(1, n_epochs+1):  # loop over the dataset multiple times
 
 print('Finished Training')
 
-PATH = './net_2.pth'
+PATH = './architectures/net_9.pth'
 torch.save(net.state_dict(), PATH)
