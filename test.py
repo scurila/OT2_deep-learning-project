@@ -4,7 +4,7 @@ from net import Net
 import torchvision
 import torchvision.transforms as transforms
 
-PATH = './architectures/net_9.pth'
+PATH = './architectures/net_10.pth'
 
 net = Net()
 net.load_state_dict(torch.load(PATH))
@@ -36,6 +36,6 @@ with torch.no_grad():
             print(i)
         i += 1
 
-print('Accuracy of the network on the 10000 test images: %d %%' % (
+print('Accuracy of the network on the 10 000 test images: %d %%' % (
     100 * correct / total))
 

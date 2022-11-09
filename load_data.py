@@ -34,13 +34,14 @@ train_new_idx, valid_idx = indices_train[split_tv:],indices_train[:split_tv]
 
 # Define two "samplers" that will randomly pick examples from the training and validation set
 train_sampler = SubsetRandomSampler(train_new_idx)
+train_sampler_balanced = ImbalancedDatasetSampler(train_data)
 valid_sampler = SubsetRandomSampler(valid_idx)
 
 # Dataloaders (take care of loading the data from disk, batch by batch, during training)
 # 1st try
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=1)
 # 2nd try
-train_loader_balanced = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=ImbalancedDatasetSampler(train_data), num_workers=1)
+train_loader_balanced = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=train_sampler_balanced, num_workers=1)
 
 valid_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=valid_sampler, num_workers=1)
 test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=1)
@@ -58,7 +59,7 @@ optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
 # optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 # Training 
-n_epochs = 3 # number of epochs
+n_epochs = 2 # number of epochs
 i = 0 # number of iterations
 print_every_n_batch = 200
 for epoch in range(1, n_epochs+1):  # loop over the dataset multiple times
@@ -83,5 +84,5 @@ for epoch in range(1, n_epochs+1):  # loop over the dataset multiple times
 
 print('Finished Training')
 
-PATH = './architectures/net_9.pth'
+PATH = './architectures/net_10.pth'
 torch.save(net.state_dict(), PATH)
