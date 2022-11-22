@@ -2,3 +2,4 @@
 /test_images/
 .pgm
 __pycache__/
+/cropped/
