@@ -48,7 +48,6 @@ def window_scale_reduction(net, winW, winH, image):
 			if (predicted == torch.tensor([1])):
 				m = torch.nn.Softmax(dim=1)
 				face_prob = float(m(output)[0][1])
-				print(face_prob)
 				# Select the crops that produce the highest confidence (probability) of it being a face
 				if face_prob > confidence_required:    
 					faces.append((x, y, m(output)))
@@ -76,5 +75,5 @@ def window_scale_reduction(net, winW, winH, image):
 
 if __name__ == "__main__":
 	net = Net()
-	net.load_state_dict(torch.load("./models/net_10.pth"))
+	net.load_state_dict(torch.load("./models/net_11.pth"))
 	window_scale_reduction(net, winW, winH, image)
