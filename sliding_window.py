@@ -6,6 +6,7 @@ from net import *
 import torchvision
 
 image = cv2.imread('family-portrait-half.jpg', cv2.IMREAD_GRAYSCALE)
+image = image / 255.0
 # size window
 winW = 36
 winH = 36
@@ -35,26 +36,29 @@ def window_scale_reduction(net, winW, winH, image):
 			# MACHINE LEARNING CLASSIFIER TO CLASSIFY THE CONTENTS OF THE
 			# WINDOW
 			window_tensor = torch.from_numpy(window)
-			# resize tensor from the shape [36, 36] to [1,1,36,36]
+			# tensor from the shape [36, 36] to [1,1,36,36]
 			window_tensor = window_tensor[None, None, :, :]
 			output = net(window_tensor.float())
 			_, predicted = torch.max(output.data, 1)
-			if(predicted == torch.tensor([1])):
-				faces.append((x, y, output[0][1]))
-				crop_img = clone[y:y + winH, x:x + winW]
-				Image.fromarray(crop_img,mode='L').save('cropped/img-cropped-'+str(img_nb)+'.jpg')
-				img_nb += 1
-	
-			# since we do not have a classifier, we'll just draw the window
 			
 			clone = resized.copy()
+			# if face, saved the cropped image and the details in a file
+			if(predicted == torch.tensor([1])):
+				faces.append((x, y, output[0]))
+				crop_img = clone[y:y + winH, x:x + winW]
+				crop_img = crop_img*255.0
+				cv2.imwrite('cropped/img-cropped-'+str(img_nb)+'.jpg',crop_img)
+				#Image.fromarray(crop_img,mode='L').save('cropped/img-cropped-'+str(img_nb)+'.jpg')
+				img_nb += 1
+	
+			#  draw the window
+			#clone = resized.copy()
 			#save the cropped image
 			#crop_img = clone[y:y + winH, x:x + winW]
 			#Image.fromarray(crop_img,mode='L').save('cropped/img-cropped-'+str(img_nb)+'.jpg')
 			cv2.rectangle(clone, (x, y), (x + winW, y + winH), (0, 255, 0), 2)
 			cv2.imshow("Window", clone)
 			cv2.waitKey(1)
-			#time.sleep(0.025)
 			#img_nb += 1
 
 		# Add the detected faces and the corresponding factors to the all_faces variable

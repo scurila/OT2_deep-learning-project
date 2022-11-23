@@ -25,6 +25,7 @@ if __name__ == '__main__':
     total = 0
     i = 0 # number of iterations
     print_every_n_batch = 100
+    """
     with torch.no_grad():
         for data in test_loader:
             images, labels = data
@@ -39,4 +40,27 @@ if __name__ == '__main__':
 
     print('Accuracy of the network on the 10 000 test images: %d %%' % (
         100 * correct / total))
+    """    
+
+    classes = ('noface', 'face')
+
+    correct_pred = {classname: 0 for classname in classes}
+    total_pred = {classname: 0 for classname in classes}
+
+    # Again no gradients needed
+    with torch.no_grad():
+        for data in test_loader:
+            images, labels = data
+            outputs = net(images)
+            _, predictions = torch.max(outputs, 1)
+            # Collect the correct predictions for each class
+            for label, prediction in zip(labels, predictions):
+                if label == prediction:
+                    correct_pred[classes[label]] += 1
+                total_pred[classes[label]] += 1
+
+    # Print accuracy for each class
+    for classname, correct_count in correct_pred.items():
+        accuracy = 100 * float(correct_count) / total_pred[classname]
+        print(f'Accuracy for class: {classname:5s} is {accuracy:.1f} %')
 
