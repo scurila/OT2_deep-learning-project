@@ -1,4 +1,6 @@
 import torch
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 
 # Non Maximum Suppression
 
@@ -95,10 +97,6 @@ def nms_pytorch(P : torch.tensor ,thresh_iou : float):
         # keep the boxes with IoU less than thresh_iou
         mask = IoU < thresh_iou
         order = order[mask]
-        print(mask)
-        print(order)
-        print(IoU)
-     
     return keep
 
 # Let P be the following
@@ -109,6 +107,22 @@ P = torch.tensor([
     [1, 0.9, 3.5, 3, 0.97]
 ])
 
-	
-filtered_boxes = nms_pytorch(P,0.8)
+print(float(P[0][0]))
+
+def plot_boxes(tensor):
+    #define Matplotlib figure and axis
+    fig, ax = plt.subplots()
+
+    #create simple line plot
+    ax.plot([0, 10],[0, 10], alpha=0)
+
+    for vector in tensor:
+        ax.add_patch(Rectangle((float(vector[0]), float(vector[1])), abs(float(vector[2]) - float(vector[0])), abs(float(vector[3]) - float(vector[1])), edgecolor="red")).set_fill(False)
+
+
+    #display plot
+    plt.show()
+
+filtered_boxes = nms_pytorch(P, 0.8)
 print(filtered_boxes)
+plot_boxes(filtered_boxes)
