@@ -25,7 +25,7 @@ def window_scale_reduction(net, winW, winH, image):
 	img_nb = 0 # index of the cropped image
 
 	all_faces = []
-	faces_with_probs = []
+	faces_tensors = []
 	rectangles = []
 	# loop over the image pyramid
 	for resized in pyramid(image, scale=1.25):
@@ -61,13 +61,15 @@ def window_scale_reduction(net, winW, winH, image):
 					new_winW = int(winW * curr_scale_factor)
 					new_winH = int(winH * curr_scale_factor)
 					rectangles.append([(new_x, new_y), ((new_x + new_winW), (new_y + new_winH))])
-					faces_with_probs.append([new_x, new_y, new_x + new_winW, new_y + new_winH, face_prob])
+					faces_tensors.append([new_x, new_y, new_x + new_winW, new_y + new_winH, face_prob])
 					img_nb += 1
 
 			# save the cropped image
 			cv2.rectangle(clone, (x, y), (x + winW, y + winH), (0, 255, 0), 2)
 			cv2.imshow("Window", clone)
 			cv2.waitKey(1)
+			# time.sleep(0.025)
+			# img_nb += 1
 
 		# Add the detected faces and the corresponding factors to the all_faces variable
 		all_faces.append([curr_scale_factor, faces])
@@ -78,12 +80,17 @@ def window_scale_reduction(net, winW, winH, image):
 			# Write each item on a new line
 			fp.write("%s\n" % face)
 
-	# Apply Non Maximum suppresion
-	val = nms_pytorch(torch.tensor(faces_with_probs), 0.2)
-	print(val)
-	print(len(val))
+	# Apply nms
+	tensor_faces = nms_pytorch(torch.tensor(faces_tensors), 0.2)
+	#change 
+	new_tensor_faces = []
+	for face in tensor_faces:
+		tuple1 = (int(face[0]),int(face[1]))
+		tuple2 = (int(face[2]),int(face[3]))
+		new_tensor_faces.append([tuple1,tuple2])
 
-	return all_faces, rectangles
+
+	return all_faces, rectangles,new_tensor_faces
 
 
 def save_final_image(rectangles):
@@ -92,8 +99,19 @@ def save_final_image(rectangles):
         cv2.rectangle(image, rectangle[0], rectangle[1], (0, 0, 255))
     cv2.imwrite('cropped/img-cropped-'+ 'final' + '.jpg', image)
 
+def save_final_image_tensor(tensor):
+    image = cv2.imread('family-portrait-half.jpg')
+    for face in tensor:
+        cv2.rectangle(image, face[0], face[1], (0, 0, 255))
+    cv2.imwrite('cropped/img-cropped-'+ 'final_tensor' + '.jpg', image)
+
 if __name__ == "__main__":
 	net = Net()
 	net.load_state_dict(torch.load("./models/net_11.pth"))
-	all_faces, rectangles = window_scale_reduction(net, winW, winH, image)
+	all_faces, rectangles ,tensor_faces = window_scale_reduction(net, winW, winH, image)
 	save_final_image(rectangles)
+	#print(len(tensor_faces))
+	print("tensors = ",tensor_faces[0])
+	print("rectangele = ",rectangles[0])
+
+	save_final_image_tensor(tensor_faces)
