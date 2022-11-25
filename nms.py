@@ -117,7 +117,7 @@ def plot_boxes(tensor):
     ax.plot([0, 10],[0, 10], alpha=0)
 
     for vector in tensor:
-        ax.add_patch(Rectangle((float(vector[0]), float(vector[1])), abs(float(vector[2]) - float(vector[0])), abs(float(vector[3]) - float(vector[1])), edgecolor="red")).set_fill(False)
+        ax.add_patch(Rectangle((float(174), float(78)), 36, 36, edgecolor="red")).set_fill(False)
 
 
     #display plot

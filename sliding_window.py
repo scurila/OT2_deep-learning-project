@@ -24,7 +24,7 @@ def window_scale_reduction(net, winW, winH, image):
 	img_nb = 0 # index of the cropped image
 
 	all_faces = []
-	
+	rectangles = []
 	# loop over the image pyramid
 	for resized in pyramid(image, scale=1.25):
 		faces = []
@@ -49,11 +49,16 @@ def window_scale_reduction(net, winW, winH, image):
 				m = torch.nn.Softmax(dim=1)
 				face_prob = float(m(output)[0][1])
 				# Select the crops that produce the highest confidence (probability) of it being a face
-				if face_prob > confidence_required:    
+				if face_prob > confidence_required:
 					faces.append((x, y, m(output)))
 					crop_img = clone[y:y + winH, x:x + winW]
-					crop_img = crop_img * 255.0 # Denormalizing the image 
+					crop_img = crop_img * 255.0
 					cv2.imwrite('cropped/img-cropped-'+ str(img_nb)+'.jpg', crop_img)
+					new_x = int(x * curr_scale_factor)
+					new_y = int(y * curr_scale_factor)
+					new_winW = int(winW * curr_scale_factor)
+					new_winH = int(winH * curr_scale_factor)
+					rectangles.append([(new_x, new_y), ((new_x + new_winW), (new_y + new_winH))])
 					img_nb += 1
 
 			# save the cropped image
@@ -71,9 +76,17 @@ def window_scale_reduction(net, winW, winH, image):
 		for face in all_faces:
 			# Write each item on a new line
 			fp.write("%s\n" % face)
-	return all_faces	
+	return all_faces, rectangles
+
+
+def save_final_image(rectangles):
+    image = cv2.imread('family-portrait-half.jpg')
+    for rectangle in rectangles:
+        cv2.rectangle(image, rectangle[0], rectangle[1], (0, 0, 255))
+    cv2.imwrite('cropped/img-cropped-'+ 'final' + '.jpg', image)
 
 if __name__ == "__main__":
 	net = Net()
 	net.load_state_dict(torch.load("./models/net_11.pth"))
-	window_scale_reduction(net, winW, winH, image)
+	all_faces, rectangles = window_scale_reduction(net, winW, winH, image)
+	save_final_image(rectangles)
