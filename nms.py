@@ -99,6 +99,7 @@ def nms_pytorch(P : torch.tensor ,thresh_iou : float):
         order = order[mask]
     return keep
 
+"""
 # Let P be the following
 P = torch.tensor([
     [1, 1, 3, 3, 0.95],
@@ -126,3 +127,4 @@ def plot_boxes(tensor):
 filtered_boxes = nms_pytorch(P, 0.8)
 print(filtered_boxes)
 plot_boxes(filtered_boxes)
+"""
