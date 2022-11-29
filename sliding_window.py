@@ -107,6 +107,32 @@ def apply_sliding_window_image_piramid(net, winW, winH, image):
 
 	return all_faces, faces_positions, new_faces_postions
 
+def resize_bootstrap_images(winW, winH, image):
+    	# Remove all the contents of the 'cropped' folder
+	dir = 'resized'
+	for f in os.listdir(dir):
+		os.remove(os.path.join(dir, f))
+
+	img_nb = 0 # index of the cropped image
+	# Loop over the image pyramid
+	for resized in pyramid(image, scale=2):
+		faces = []
+		scale_value = image.shape[0] / resized.shape[0]
+		# loop over the sliding window for each layer of the pyramid
+		for (x, y, window) in sliding_window(resized, stepSize=stepSize, windowSize=(winW, winH)):
+			# if the window does not meet our desired window size, ignore it
+			if window.shape[0] != winH or window.shape[1] != winW:
+				continue
+			# save the resized image
+			clone = resized.copy()
+			crop_img = clone[y:y + winH, x:x + winW]
+			cv2.imwrite('resized/img-resized-'+ str(img_nb)+'.jpg', crop_img)
+			img_nb+=1
+			# show the window on the resized image
+			cv2.rectangle(clone, (x, y), (x + winW, y + winH), (0, 255, 0), 2)
+			cv2.imshow("Window_boostrap", clone)
+			cv2.waitKey(1)
+
 # Show all detected faces with a red rectangle in the final image before applying nms
 def save_final_image(faces_positions):
     image = cv2.imread('family-portrait-half.jpg')
@@ -122,8 +148,10 @@ def save_final_image_nms(faces_positions):
     cv2.imwrite('cropped/img-cropped-'+ 'final_nms' + '.jpg', image)
 
 if __name__ == "__main__":
-	net = Net()
-	net.load_state_dict(torch.load("./models/net_11.pth"))
-	all_faces, faces_positions, new_faces_positions = apply_sliding_window_image_piramid(net, winW, winH, image)
-	save_final_image(faces_positions)
-	save_final_image_nms(new_faces_positions)
+	#net = Net()
+	#net.load_state_dict(torch.load("./models/net_11.pth"))
+	#all_faces, faces_positions, new_faces_positions = apply_sliding_window_image_piramid(net, winW, winH, image)
+	#save_final_image(faces_positions)
+	#save_final_image_nms(new_faces_positions)
+	image_bootstrap = cv2.imread('flecked_0055.jpg', cv2.IMREAD_GRAYSCALE)
+	resize_bootstrap_images(winW, winH,image_bootstrap)

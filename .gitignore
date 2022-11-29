@@ -3,3 +3,4 @@
 .pgm
 __pycache__/
 /cropped/
+/resized/
