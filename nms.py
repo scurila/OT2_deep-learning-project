@@ -98,33 +98,3 @@ def nms_pytorch(P : torch.tensor ,thresh_iou : float):
         mask = IoU < thresh_iou
         order = order[mask]
     return keep
-
-"""
-# Let P be the following
-P = torch.tensor([
-    [1, 1, 3, 3, 0.95],
-    [1, 1, 3, 4, 0.93],
-    [1, 0.9, 3.6, 3, 0.98],
-    [1, 0.9, 3.5, 3, 0.97]
-])
-
-print(float(P[0][0]))
-
-def plot_boxes(tensor):
-    #define Matplotlib figure and axis
-    fig, ax = plt.subplots()
-
-    #create simple line plot
-    ax.plot([0, 10],[0, 10])
-
-    for vector in tensor:
-        ax.add_patch(Rectangle((float(vector[0]), float(vector[1])), abs(float(vector[2]) - float(vector[0])), abs(float(vector[3]) - float(vector[1])), edgecolor="red")).set_fill(False)
-
-
-    #display plot
-    plt.show()
-
-filtered_boxes = nms_pytorch(P, 0.8)
-print(filtered_boxes)
-plot_boxes(filtered_boxes)
-"""
