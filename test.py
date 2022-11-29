@@ -4,13 +4,13 @@ from net import Net
 import torchvision
 import torchvision.transforms as transforms
 
-PATH = './models/net_10.pth'
+PATH = './models/net_test_bootstrap3.pth'
 
 if __name__ == '__main__':
     net = Net()
     net.load_state_dict(torch.load(PATH))
 
-    test_dir = './test_images'    # folder containing test images
+    test_dir = '../CNN_project/test_images'    # folder containing test images
 
     transform = transforms.Compose(
         [transforms.Grayscale(),   # transforms to gray-scale (1 input channel)
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     total = 0
     i = 0 # number of iterations
     print_every_n_batch = 100
-    """
+    
     with torch.no_grad():
         for data in test_loader:
             images, labels = data
@@ -34,13 +34,9 @@ if __name__ == '__main__':
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-            if i % print_every_n_batch == 0:
-                print(i)
-            i += 1
-
     print('Accuracy of the network on the 10 000 test images: %d %%' % (
         100 * correct / total))
-    """    
+       
 
     classes = ('noface', 'face')
 

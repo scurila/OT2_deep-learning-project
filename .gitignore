@@ -3,4 +3,5 @@
 .pgm
 __pycache__/
 /cropped/
-/resized/
+/crops_resized/
+/texture_imgs/
