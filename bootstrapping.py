@@ -7,11 +7,14 @@ import torchvision
 import numpy as np
 import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
+from torchsampler import ImbalancedDatasetSampler
 from net import Net
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
 from sliding_window import sliding_window
+from test import test_model
+from copy import deepcopy
 
 winW = 36
 winH = 36
@@ -71,6 +74,8 @@ def bootstrapping():
     valid_sampler = SubsetRandomSampler(valid_new_idx)
     # valid_sampler = ImbalancedDatasetSampler(train_data, indices=valid_new_idx)
     valid_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=valid_sampler, num_workers=1)
+    
+    valid_loader_copy = deepcopy(valid_loader)
 
     # Remove this from the train data
 
@@ -85,9 +90,6 @@ def bootstrapping():
     bootsIterations = 6
     thresholdFace = 0.8
 
-    # sampler_type = type(train_sampler).__name__
-    # print(f'Training the NN (using {sampler_type}) with\nN_EPOCHS = {n_epochs}   lr = {lr}   momentum = {momentum} ...')
-
     # 3rd step
 
     n_nofaces_og = len([img for img in train_data.imgs if img[1] == 0]) # Original number of non-faces (after removing validation set)
@@ -96,13 +98,15 @@ def bootstrapping():
 
     n_faces_og = num_train_og - n_nofaces_og  # Original number of faces (after removing validation set)
 
-    new_train_data = train_data
+    new_train_data = deepcopy(train_data)
 
     # We decided we will use 1778 (random number) texture/scenery images for the false alarm examples
 
     for bootsIter in range(bootsIterations):
         print('bootsIter:', bootsIter)
         indices_train = list(range(len(new_train_data)))
+        print('New length of training set:', len(new_train_data))
+
         # Grabbing balanced subsets of both faces and nofaces
 
         # no-faces, faces, false-alarms
@@ -120,13 +124,16 @@ def bootstrapping():
         new_idx_train = idx_noface + new_idx_face
 
         train_sampler = SubsetRandomSampler(new_idx_train)
-
-        # print(len(new_idx_train))
-        # for idx in idx_noface:
-        #     if train_data[idx][1] == 0:
-        #         print('no')
+        # train_sampler = ImbalancedDatasetSampler(new_train_data)
 
         train_loader = torch.utils.data.DataLoader(new_train_data, batch_size=batch_size, sampler=train_sampler, num_workers=1)
+
+        sampler_type = type(train_sampler).__name__
+        print(f'Training the NN (using {sampler_type}) with\nN_EPOCHS = {n_epochs}   lr = {lr}   momentum = {momentum} ...')
+        
+        # Re-setting the model completely, otherwise it's just another epoch
+        model = Net()
+        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum)
 
         for epoch in range(n_epochs):  # loop over the dataset multiple times
 
@@ -142,25 +149,28 @@ def bootstrapping():
                 
                 # Print statistics
                 running_loss += loss.item()
-                if i % 200 == 199:    # Print every 1000 mini-batches
-                    print(f'[epoch {epoch + 1}, {i + 1:5d}] loss: {running_loss / 200:.3f}')
+                if i % 400 == 399:    # Print every 1000 mini-batches
+                    print(f'[epoch {epoch + 1}, {i + 1:5d}] loss: {running_loss / 400:.3f}')
                     running_loss = 0.0
         
         # Save the model 
-        PATH = f'./models/bootstrap/iter-{bootsIter}.pth'
+        PATH = f'./models/bootstrap/imb-iter-{bootsIter}.pth'
         torch.save(model.state_dict(), PATH)
 
         # Load the model
-        # PATH = './models/net_test_bootstrap3.pth'
+        # PATH = './models/bootstrap/iter-0.pth'
         # model = Net()
         # model.load_state_dict(torch.load(PATH))
-
 
         # Finished training
 
         fa_count = 0
 
-        print('Finished training. Getting false alarms.')
+        print('Finished training. Testing on validation set...')
+
+        test_model(model, valid_loader_copy) # Test on validation set and print accuracies 
+
+        print('Getting false alarms...')
 
         for img_path in os.listdir('texture_imgs'):
             if fa_count == max_new_fa: # Check if the maximum n of false alarms has been reached
@@ -195,7 +205,7 @@ def bootstrapping():
 
         false_alarm_data = torchvision.datasets.ImageFolder(false_alarm_dir, transform=transform)
 
-        print('Number of false alarms:', len(false_alarm_data))
+        print('Number of total false alarms:', len(false_alarm_data), ', of which', fa_count, 'were just added')
 
         new_train_data = torch.utils.data.ConcatDataset([train_data, false_alarm_data]) # Append nofaces at the end
 

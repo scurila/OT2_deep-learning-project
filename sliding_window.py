@@ -5,8 +5,8 @@ import torch
 from net import *
 from nms import *
 
-image = cv2.imread('family-portrait-half.jpg', cv2.IMREAD_GRAYSCALE)
-image = image / 255.0 # normalizing the image because the model was trained with normalized values
+image_path = './fam_pphoto2.jpg'
+model_path = './models/net_11.pth'
 
 winW = 36 # window width
 winH = 36 # window height
@@ -129,23 +129,25 @@ def resize_bootstrap_images(winW, winH, image, img_count):
 	return img_count
 
 # Show all detected faces with a red rectangle in the final image before applying nms
-def save_final_image(faces_positions):
-    image = cv2.imread('family-portrait-half.jpg')
+def save_final_image(faces_positions, image_path):
+    image = cv2.imread(image_path)
     for pos in faces_positions:
         cv2.rectangle(image, pos[0], pos[1], (0, 0, 255))
     cv2.imwrite('cropped/img-cropped-'+ 'final' + '.jpg', image)
 
 # Show all detected faces with a red rectangle in the final image after applying nms
-def save_final_image_nms(faces_positions):
-    image = cv2.imread('family-portrait-half.jpg')
+def save_final_image_nms(faces_positions, image_path):
+    image = cv2.imread(image_path)
     for pos in faces_positions:
         cv2.rectangle(image, pos[0], pos[1], (0, 0, 255))
     cv2.imwrite('cropped/img-cropped-'+ 'final_nms' + '.jpg', image)
 
 if __name__ == "__main__":
 	net = Net()
-	net.load_state_dict(torch.load("./models/bootstrap/iter-4.pth"))
+	net.load_state_dict(torch.load(model_path))
+	image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+	image = image / 255.0 # normalizing the image because the model was trained with normalized values
 	all_faces, faces_positions, new_faces_positions = apply_sliding_window_image_piramid(net, winW, winH, image)
-	save_final_image(faces_positions)
-	save_final_image_nms(new_faces_positions)
+	save_final_image(faces_positions, image_path)
+	save_final_image_nms(new_faces_positions, image_path)
 		
