@@ -21,6 +21,9 @@ stepSize_bootstrap = 6
 
 max_new_fa = 12845 # 1/5 of the OG faces
 
+for f in os.listdir('./false_alarms/0'):
+    os.remove(f'./false_alarms/0/{f}')
+
 def bootstrapping():
     train_dir = '../CNN_project/train_images'
     false_alarm_dir = './false_alarms'
@@ -92,18 +95,27 @@ def bootstrapping():
     num_train_og = len(train_data) # Original number of faces and non-faces (after removing validation set)
 
     n_faces_og = num_train_og - n_nofaces_og  # Original number of faces (after removing validation set)
-    indices_train = list(range(num_train_og))
+
+    new_train_data = train_data
 
     # We decided we will use 1778 (random number) texture/scenery images for the false alarm examples
 
     for bootsIter in range(bootsIterations):
-
+        print('bootsIter:', bootsIter)
+        indices_train = list(range(len(new_train_data)))
         # Grabbing balanced subsets of both faces and nofaces
-        idx_noface = indices_train[:n_nofaces_og]
-        idx_face = indices_train[n_nofaces_og:] # [6000, 6001, ... , 27 000]
+
+        # no-faces, faces, false-alarms
+        if len(new_train_data) == len(train_data):
+            # First iteration
+            idx_noface = indices_train[:n_nofaces_og]
+        else:
+            idx_noface = indices_train[:n_nofaces_og] + indices_train[n_faces_og:]
+
+        idx_face = indices_train[n_nofaces_og: n_faces_og] # [6000, 6001, ... , 27 000]
         # Grabbing n_nofaces_og shuffled faces
         np.random.shuffle(idx_face)
-        new_idx_face = idx_face[:n_nofaces_og]
+        new_idx_face = idx_face[:len(idx_noface)]
 
         new_idx_train = idx_noface + new_idx_face
 
@@ -114,39 +126,41 @@ def bootstrapping():
         #     if train_data[idx][1] == 0:
         #         print('no')
 
-        train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=1)
+        train_loader = torch.utils.data.DataLoader(new_train_data, batch_size=batch_size, sampler=train_sampler, num_workers=1)
 
-        # for epoch in range(n_epochs):  # loop over the dataset multiple times
+        for epoch in range(n_epochs):  # loop over the dataset multiple times
 
-        #     running_loss = 0.0
-        #     for i, (data, target) in enumerate(train_loader):
-        #         # zero the parameter gradients
-        #         optimizer.zero_grad()
-        #         # forward + backward + optimize
-        #         outputs = model(data)
-        #         loss = criterion(outputs, target)
-        #         loss.backward()
-        #         optimizer.step()
+            running_loss = 0.0
+            for i, (data, target) in enumerate(train_loader):
+                # zero the parameter gradients
+                optimizer.zero_grad()
+                # forward + backward + optimize
+                outputs = model(data)
+                loss = criterion(outputs, target)
+                loss.backward()
+                optimizer.step()
                 
-        #         # Print statistics
-        #         running_loss += loss.item()
-        #         if i % 1000 == 999:    # Print every 1000 mini-batches
-        #             print(f'[epoch {epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
-        #             running_loss = 0.0
+                # Print statistics
+                running_loss += loss.item()
+                if i % 200 == 199:    # Print every 1000 mini-batches
+                    print(f'[epoch {epoch + 1}, {i + 1:5d}] loss: {running_loss / 200:.3f}')
+                    running_loss = 0.0
         
         # Save the model 
-        # PATH = './models/net_test_bootstrap3.pth'
-        # torch.save(model.state_dict(), PATH)
+        PATH = f'./models/bootstrap/iter-{bootsIter}.pth'
+        torch.save(model.state_dict(), PATH)
 
         # Load the model
-        PATH = './models/net_test_bootstrap3.pth'
-        model = Net()
-        model.load_state_dict(torch.load(PATH))
+        # PATH = './models/net_test_bootstrap3.pth'
+        # model = Net()
+        # model.load_state_dict(torch.load(PATH))
 
 
         # Finished training
 
         fa_count = 0
+
+        print('Finished training. Getting false alarms.')
 
         for img_path in os.listdir('texture_imgs'):
             if fa_count == max_new_fa: # Check if the maximum n of false alarms has been reached
@@ -174,33 +188,19 @@ def bootstrapping():
                     face_prob = float(m(output)[0][1]) # face probability
                     if face_prob > thresholdFace:
                         crop_img = clone[y:y + winH, x:x + winW]
-                        cv2.imwrite('false_alarms/0/fa-'+ str(fa_count)+'.jpg', crop_img)
+                        cv2.imwrite(f'false_alarms/0/{bootsIter}-fa-{str(fa_count)}.jpg', crop_img)
                         fa_count += 1
-
-                # # show the window on the crops_ image
-                # cv2.rectangle(clone, (x, y), (x + winW, y + winH), (0, 255, 0), 2)
-                # cv2.imshow("Window_boostrap", clone)
-                # cv2.waitKey(1)
 
         # False alarms saved
 
         false_alarm_data = torchvision.datasets.ImageFolder(false_alarm_dir, transform=transform)
 
-        false_alarm_count = len(false_alarm_data)
-        print(false_alarm_count)
+        print('Number of false alarms:', len(false_alarm_data))
 
-        concat = torch.utils.data.ConcatDataset([train_data, false_alarm_data]) # Append nofaces at the end
+        new_train_data = torch.utils.data.ConcatDataset([train_data, false_alarm_data]) # Append nofaces at the end
 
-
-        # num_train = len(train_data)
-        # indices_train = list(range(num_train))
-        # np.random.shuffle(indices_train)
-        # split_tv = int(np.floor(valid_size * num_train))
-        # train_new_idx, valid_idx = indices_train[split_tv:],indices_train[:split_tv]
-
-        # train_loader
-
-        # Training
+        if thresholdFace >= 0.2:
+            thresholdFace -= 0.2
 
 if __name__ == '__main__':
     bootstrapping()

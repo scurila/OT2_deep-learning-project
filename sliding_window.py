@@ -144,17 +144,8 @@ def save_final_image_nms(faces_positions):
 
 if __name__ == "__main__":
 	net = Net()
-	net.load_state_dict(torch.load("./models/net_11.pth"))
+	net.load_state_dict(torch.load("./models/bootstrap/iter-4.pth"))
 	all_faces, faces_positions, new_faces_positions = apply_sliding_window_image_piramid(net, winW, winH, image)
 	save_final_image(faces_positions)
 	save_final_image_nms(new_faces_positions)
-	image_bootstrap = cv2.imread('flecked_0055.jpg', cv2.IMREAD_GRAYSCALE)
-	resize_bootstrap_images(winW, winH,image_bootstrap)
-	img_count = 0
-	# for f in os.listdir('texture_imgs'):
-	# 	os.remove(os.path.join(dir, f))
-	for img_path in os.listdir('texture_imgs'):
-		image_bootstrap = cv2.imread('./texture_imgs/' + img_path, cv2.IMREAD_GRAYSCALE)
-		img_count = resize_bootstrap_images(winW, winH, image_bootstrap, img_count)
-		# print(image_bootstrap)
 		

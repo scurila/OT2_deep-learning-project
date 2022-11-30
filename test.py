@@ -4,7 +4,7 @@ from net import Net
 import torchvision
 import torchvision.transforms as transforms
 
-PATH = './models/net_test_bootstrap3.pth'
+PATH = './models/bootstrap/iter-4.pth'
 
 if __name__ == '__main__':
     net = Net()
