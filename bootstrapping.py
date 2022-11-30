@@ -9,8 +9,6 @@ import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchsampler import ImbalancedDatasetSampler
 from net import Net
-import torch.nn as nn
-import torch.optim as optim
 import torch.utils.data
 from sliding_window import sliding_window
 from test import test_model
