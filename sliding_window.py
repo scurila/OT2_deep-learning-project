@@ -5,13 +5,15 @@ import torch
 from net import *
 from nms import *
 
-image_path = './fam_pphoto2.jpg'
-model_path = './models/net_11.pth'
+image_path = './fam_pictures/test_fam2.jpg'
+model_path = './models/bootstrap/3ep-iter-2.pth'
 
 winW = 36 # window width
 winH = 36 # window height
 
-confidence_required = 0.995 # threshold for the probability of a detected face
+threshold_nms = 0.2
+
+confidence_required = 0.994 # threshold for the probability of a detected face
 stepSize = 6 # pixel step for each window
 
 def pyramid(image, scale=1.25, minSize=(30, 30)): # rescale -20%
@@ -97,7 +99,7 @@ def apply_sliding_window_image_piramid(net, winW, winH, image):
 			fp.write("%s\n" % face)
 
 	# Apply nms
-	new_faces = nms_pytorch(torch.tensor(faces_positions_tensor), 0.2)
+	new_faces = nms_pytorch(torch.tensor(faces_positions_tensor), threshold_nms)
 	# save the positions of the detected faces as a list of tuples 
 	new_faces_postions = []
 	for face in new_faces:
