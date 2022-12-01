@@ -19,6 +19,7 @@ winH = 36
 
 rescale_factor_bootstrap = 3
 stepSize_bootstrap = 6
+bootsIterations = 7
 
 max_new_fa = 12845 # 1/5 of the OG faces
 
@@ -45,7 +46,7 @@ def bootstrapping():
     transform = transforms.Compose(
         [transforms.Grayscale(), 
         transforms.ToTensor(), 
-        transforms.Normalize(mean=(0,),std=(1,))
+        transforms.Normalize(mean=(0.5,),std=(0.5,))
         ])
 
     train_data = torchvision.datasets.ImageFolder(train_dir, transform=transform)
@@ -85,7 +86,6 @@ def bootstrapping():
     # Validation done
 
     # 2nd step
-    bootsIterations = 6
     thresholdFace = 0.8
 
     # 3rd step
@@ -145,14 +145,14 @@ def bootstrapping():
                 loss.backward()
                 optimizer.step()
                 
-                # Print statistics
+                # Print loss
                 running_loss += loss.item()
-                if i % 400 == 399:    # Print every 1000 mini-batches
+                if i % 400 == 399:    # Print every 400 mini-batches
                     print(f'[epoch {epoch + 1}, {i + 1:5d}] loss: {running_loss / 400:.3f}')
                     running_loss = 0.0
         
         # Save the model 
-        PATH = f'./models/bootstrap/imb-iter-{bootsIter}.pth'
+        PATH = f'./models/bootstrap/3ep-iter-{bootsIter}.pth'
         torch.save(model.state_dict(), PATH)
 
         # Load the model
