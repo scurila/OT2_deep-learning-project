@@ -92,12 +92,6 @@ def apply_sliding_window_image_piramid(net, winW, winH, image):
 		# Add the detected faces and the corresponding factors to the all_faces variable
 		all_faces.append([scale_value, faces])
 
-	# Save the faces in a file
-	with open('detected_faces.txt', 'w') as fp:
-		for face in all_faces:
-			# Write each item on a new line
-			fp.write("%s\n" % face)
-
 	# Apply nms
 	new_faces = nms_pytorch(torch.tensor(faces_positions_tensor), threshold_nms)
 	# save the positions of the detected faces as a list of tuples 
