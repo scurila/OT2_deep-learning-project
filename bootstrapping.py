@@ -1,13 +1,11 @@
 import cv2
 import os
-import random
 import imutils
 import torch
 import torchvision
 import numpy as np
 import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
-from torchsampler import ImbalancedDatasetSampler
 from net import Net
 import torch.utils.data
 from sliding_window import sliding_window
@@ -29,7 +27,6 @@ for f in os.listdir('./false_alarms/0'):
 def bootstrapping():
     train_dir = '../CNN_project/train_images'
     false_alarm_dir = './false_alarms'
-    # test_dir = './test_images'
 
     batch_size = 32
     n_epochs = 3
@@ -50,7 +47,6 @@ def bootstrapping():
         ])
 
     train_data = torchvision.datasets.ImageFolder(train_dir, transform=transform)
-    # test_data = torchvision.datasets.ImageFolder(test_dir, transform=transform)
 
     # Take a fixed validation set
     number_of_faces = len([img for img in train_data.imgs if img[1] == 1])
@@ -71,24 +67,18 @@ def bootstrapping():
     valid_new_idx = valid_face_idx + valid_noface_idx
 
     valid_sampler = SubsetRandomSampler(valid_new_idx)
-    # valid_sampler = ImbalancedDatasetSampler(train_data, indices=valid_new_idx)
     valid_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=valid_sampler, num_workers=1)
     
     valid_loader_copy = deepcopy(valid_loader)
 
-    # Remove this from the train data
+    # Remove images of validation set from the train data
 
     imgs = [train_data.imgs[i] for i in valid_new_idx]
 
     for img in imgs:
         train_data.imgs.remove(img)
 
-    # Validation done
-
-    # 2nd step
     thresholdFace = 0.8
-
-    # 3rd step
 
     n_nofaces_og = len([img for img in train_data.imgs if img[1] == 0]) # Original number of non-faces (after removing validation set)
 
@@ -122,7 +112,6 @@ def bootstrapping():
         new_idx_train = idx_noface + new_idx_face
 
         train_sampler = SubsetRandomSampler(new_idx_train)
-        # train_sampler = ImbalancedDatasetSampler(new_train_data)
 
         train_loader = torch.utils.data.DataLoader(new_train_data, batch_size=batch_size, sampler=train_sampler, num_workers=1)
 
@@ -207,6 +196,7 @@ def bootstrapping():
 
         new_train_data = torch.utils.data.ConcatDataset([train_data, false_alarm_data]) # Append nofaces at the end
 
+        # decrease threshold
         if thresholdFace >= 0.2:
             thresholdFace -= 0.2
 

@@ -12,6 +12,7 @@ from net import Net
 
 train_dir = '../CNN_project/train_images'    # folder containing training images
 test_dir = '../CNN_project/test_images'    # folder containing test images
+PATH = './models/net_11.pth'
 
 transform = transforms.Compose(
     [transforms.Grayscale(),   # transforms to gray-scale (1 input channel)
@@ -38,9 +39,7 @@ train_sampler = SubsetRandomSampler(train_new_idx)
 valid_sampler = SubsetRandomSampler(valid_idx)
 
 # Dataloaders (take care of loading the data from disk, batch by batch, during training)
-# 1st try
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=1)
-# 2nd try
 # train_loader_balanced = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=train_sampler_balanced, num_workers=1)
 
 valid_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, sampler=valid_sampler, num_workers=1)
@@ -49,7 +48,6 @@ test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuf
 classes = ('noface','face')  # indicates that "1" means "face" and "0" non-face (only used for display)
 
 # CNN
-
 net = Net()
 print(net)
 
@@ -83,6 +81,5 @@ for epoch in range(1, n_epochs+1):  # loop over the dataset multiple times
         i += 1
 
 print('Finished Training')
-
-PATH = './models/net_15.pth'
+# Save the model in the PATH
 torch.save(net.state_dict(), PATH)

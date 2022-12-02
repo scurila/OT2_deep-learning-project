@@ -5,7 +5,7 @@ import torch
 from net import *
 from nms import *
 
-image_path = './fam_pictures/test_fam2.jpg'
+image_path = './fam_pictures/test_fam0.jpg'
 model_path = './models/bootstrap/3ep-iter-2.pth'
 
 winW = 36 # window width
@@ -16,7 +16,9 @@ threshold_nms = 0.2
 confidence_required = 0.994 # threshold for the probability of a detected face
 stepSize = 6 # pixel step for each window
 
-def pyramid(image, scale=1.25, minSize=(30, 30)): # rescale -20%
+# Images pyramid algorithm
+def pyramid(image, scale=1.25, minSize=(30, 30)):
+    	
 	# yield the original image
 	yield image
 	# keep looping over the pyramid
@@ -24,13 +26,13 @@ def pyramid(image, scale=1.25, minSize=(30, 30)): # rescale -20%
 		# compute the new dimensions of the image and resize it
 		w = int(image.shape[1] / scale)
 		image = imutils.resize(image, width=w)
-		# if the resized image does not meet the supplied minimum
-		# size, then stop constructing the pyramid
+		# if the resized image does not meet the supplied minimum size, then stop constructing the pyramid
 		if image.shape[0] < minSize[1] or image.shape[1] < minSize[0]:
 			break
 		# yield the next image in the pyramid
 		yield image
 
+# Sliding window algorithm
 def sliding_window(image, stepSize, windowSize):
 	# slide a window across the image
 	for y in range(0, image.shape[0], stepSize):
@@ -38,6 +40,7 @@ def sliding_window(image, stepSize, windowSize):
 			# yield the current window
 			yield (x, y, image[y:y + windowSize[1], x:x + windowSize[0]])
 
+# Apply pyramid and sliding window algorithms
 def apply_sliding_window_image_piramid(net, winW, winH, image):
 	# Remove all the contents of the 'cropped' folder
 	dir = 'cropped'
@@ -45,8 +48,7 @@ def apply_sliding_window_image_piramid(net, winW, winH, image):
 		os.remove(os.path.join(dir, f))
 
 	img_nb = 0 # index of the cropped image
-	all_faces = [] # faces detected for each scale value
-	faces_positions = [] # detacted faces positions in the original image
+	faces_positions = [] # detected faces positions in the original image
 	faces_positions_tensor = [] # detacted faces positions in the original image and their probabiities
 	# Loop over the image pyramid
 	for resized in pyramid(image, scale=1.25):
@@ -89,9 +91,6 @@ def apply_sliding_window_image_piramid(net, winW, winH, image):
 			cv2.imshow("Window", clone)
 			cv2.waitKey(1)
 
-		# Add the detected faces and the corresponding factors to the all_faces variable
-		all_faces.append([scale_value, faces])
-
 	# Apply nms
 	new_faces = nms_pytorch(torch.tensor(faces_positions_tensor), threshold_nms)
 	# save the positions of the detected faces as a list of tuples 
@@ -101,49 +100,24 @@ def apply_sliding_window_image_piramid(net, winW, winH, image):
 		tuple2 = (int(face[2]),int(face[3]))
 		new_faces_postions.append([tuple1,tuple2])
 
-	return all_faces, faces_positions, new_faces_postions
+	return faces_positions, new_faces_postions
 
-def resize_bootstrap_images(winW, winH, image, img_count):
-	dir = 'crop_resized'
-
-	w_bootstrap = int(image.shape[1] / 3)
-	resized = imutils.resize(image, width=w_bootstrap)
-	stepSize_bootstrap = 6
-	for (x, y, window) in sliding_window(resized, stepSize=stepSize_bootstrap, windowSize=(winW, winH)):
-		# if the window does not meet our desired window size, ignore it
-		if window.shape[0] != winH or window.shape[1] != winW:
-			continue
-		# save the resized image
-		clone = resized.copy()
-		crop_img = clone[y:y + winH, x:x + winW]
-		# cv2.imwrite('crops_resized/img-crops_-'+ str(img_count)+'.jpg', crop_img)
-		img_count+=1
-		# show the window on the crops_ image
-		cv2.rectangle(clone, (x, y), (x + winW, y + winH), (0, 255, 0), 2)
-		cv2.imshow("Window_boostrap", clone)
-		cv2.waitKey(1)
-	return img_count
-
-# Show all detected faces with a red rectangle in the final image before applying nms
-def save_final_image(faces_positions, image_path):
+# Show all detected faces with a red rectangle in the final image (isNms = true if we save it for the nms version)
+def save_final_image(faces_positions, image_path, isNms):
     image = cv2.imread(image_path)
     for pos in faces_positions:
         cv2.rectangle(image, pos[0], pos[1], (0, 0, 255))
-    cv2.imwrite('cropped/img-cropped-'+ 'final' + '.jpg', image)
-
-# Show all detected faces with a red rectangle in the final image after applying nms
-def save_final_image_nms(faces_positions, image_path):
-    image = cv2.imread(image_path)
-    for pos in faces_positions:
-        cv2.rectangle(image, pos[0], pos[1], (0, 0, 255))
-    cv2.imwrite('cropped/img-cropped-'+ 'final_nms' + '.jpg', image)
+    if(isNms):
+        cv2.imwrite('cropped/img-cropped-'+ 'final_nms' + '.jpg', image)
+    else:			
+    	cv2.imwrite('cropped/img-cropped-'+ 'final' + '.jpg', image)
 
 if __name__ == "__main__":
 	net = Net()
 	net.load_state_dict(torch.load(model_path))
 	image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 	image = image / 255.0 # normalizing the image because the model was trained with normalized values
-	all_faces, faces_positions, new_faces_positions = apply_sliding_window_image_piramid(net, winW, winH, image)
-	save_final_image(faces_positions, image_path)
-	save_final_image_nms(new_faces_positions, image_path)
+	faces_positions, new_faces_positions = apply_sliding_window_image_piramid(net, winW, winH, image)
+	save_final_image(faces_positions, image_path, False) # save the detected faces before nms on a final image
+	save_final_image(new_faces_positions, image_path, True)  # save the detected faces after nms on a final image
 		
