@@ -25,7 +25,7 @@ for f in os.listdir('./false_alarms/0'):
     os.remove(f'./false_alarms/0/{f}')
 
 def bootstrapping():
-    train_dir = '../CNN_project/train_images'
+    train_dir = './train_images'
     false_alarm_dir = './false_alarms'
 
     batch_size = 32

@@ -10,8 +10,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from net import Net
 
-train_dir = '../CNN_project/train_images'    # folder containing training images
-test_dir = '../CNN_project/test_images'    # folder containing test images
+train_dir = './train_images'    # folder containing training images
+test_dir = './test_images'    # folder containing test images
 PATH = './models/net_11.pth'
 
 transform = transforms.Compose(
