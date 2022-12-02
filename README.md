@@ -16,11 +16,11 @@ This repository contains the face recognition project made by Mohamed Abderrhamn
 
 * The ``` ./fam_pictures ``` folder contains the images used to test the model.
 
-* The ``` ./models ``` folder contains the trained models of each try.
+* The ``` ./models ``` folder contains the trained models of each try and the bootstrapping models.
 
 * The ``` ./torchsample ``` and ``` ./imbalanced-dataset-sampler-master ```folder contains the used libraries.
 
-* The ``` ./texture_imgs ``` folder contains the texture images used for the bootstrapping. They can be downloaded from this [link](https://1drv.ms/u/s!AhXBXVYMvnktm_wB8OKGA-bC50NH3g?e=knhLK2)
+* The ``` ./texture_imgs ``` folder contains the texture images used for the bootstrapping. They can be downloaded from this [link](https://1drv.ms/u/s!AhXBXVYMvnktm_wB8OKGA-bC50NH3g?e=knhLK2).
 
 * The ```./train_images``` folder containes the training images
 
