@@ -20,6 +20,12 @@ This repository contains the face recognition project made by Mohamed Abderrhamn
 
 * The ``` ./torchsample ``` and ``` ./imbalanced-dataset-sampler-master ```folder contains the used libraries.
 
+* The ``` ./texture_imgs ``` folder contains the texture images used for the bootstrapping.
+
+* The ```./train_images``` folder containes the training images
+
+* The ```./test_images``` folder contains the test images
+
 | File | Description |
 | --- | --- |
 | ``` bootstrapping.py ``` | Bootstrapping algorithm is defined |
