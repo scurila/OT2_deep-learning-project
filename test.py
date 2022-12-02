@@ -3,8 +3,8 @@ from net import Net
 import torchvision
 import torchvision.transforms as transforms
 
-PATH = './models/bootstrap/3ep-iter-2.pth' # path to the used model
-test_dir = '../CNN_project/test_images'    # folder containing test images
+PATH = './models/net_11.pth' # path to the used model
+test_dir = './test_images'    # folder containing test images
 
 def test_model(model, test_loader):
     correct = 0
