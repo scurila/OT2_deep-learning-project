@@ -8,13 +8,14 @@ This repository contains the face recognition project made by Mohamed Abderrhamn
 
 ### Files composition and details
 
-:warning: :loudspeaker: The main file is ``` sliding_window.py ```. Run this file to see the execution of the complete project.
+:warning: The main file is ``` sliding_window.py ```. Run this file to see the execution of the complete project.
+:white_check_mark: The ``` /cropped ``` contains the detected faces and the final image with the bounding boxes before and after applying NMS. 
 
-| File | Run | Description |
-| --- | --- | --- |
-| ``` bootstrapping.py ``` | Run as bootstrapping.py, no parameters needed | Bootstrapping algorithm is defined |
-| ``` load_data.py ``` | No parameters needed | Database is read and saved |
-| ``` net.py ``` | No parameters needed | The architecture of the model is defined |
-| ``` nms.py ``` | No parameters needed | The non-maximum suppression algorithm is defined |
-| ``` sliding_window.py ``` | No parameters needed | Sliding window algorithm. The rescaling factor can be changed |
-| ``` test.py ``` | Run as test.py, no parameters needed | Testing the model |
+| File | Description |
+| --- | --- |
+| ``` bootstrapping.py ``` | Bootstrapping algorithm is defined |
+| ``` load_data.py ``` | Database is read and saved, and the training is done |
+| ``` net.py ``` | The architecture of the model is defined |
+| ``` nms.py ``` | The non-maximum suppression algorithm is defined |
+| ``` sliding_window.py ``` | Sliding window algorithm. The rescaling factor can be changed. The path of the images and other global varibales can be changed. |
+| ``` test.py ``` | Testing the model and its performance |
