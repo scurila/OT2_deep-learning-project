@@ -20,7 +20,7 @@ This repository contains the face recognition project made by Mohamed Abderrhamn
 
 * The ``` ./torchsample ``` and ``` ./imbalanced-dataset-sampler-master ```folder contains the used libraries.
 
-* The ``` ./texture_imgs ``` folder contains the texture images used for the bootstrapping.
+* The ``` ./texture_imgs ``` folder contains the texture images used for the bootstrapping. They can be downloaded from this [link](https://1drv.ms/u/s!AhXBXVYMvnktm_wB8OKGA-bC50NH3g?e=knhLK2)
 
 * The ```./train_images``` folder containes the training images
 
