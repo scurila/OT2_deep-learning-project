@@ -9,6 +9,7 @@ This repository contains the face recognition project made by Mohamed Abderrhamn
 ### Files composition and details
 
 :warning: The main file is ``` sliding_window.py ```. Run this file to see the execution of the complete project.
+
 :white_check_mark: The ``` /cropped ``` contains the detected faces and the final image with the bounding boxes before and after applying NMS. 
 
 | File | Description |
