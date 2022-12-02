@@ -2,8 +2,5 @@
 /test_images/
 .pgm
 __pycache__/
-/cropped/
-/crops_resized/
 /texture_imgs/
 /false_alarms/
-detected_faces.txt
