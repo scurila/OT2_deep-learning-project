@@ -10,7 +10,7 @@ This repository contains the face recognition project made by Mohamed Abderrhamn
 
 :warning: The main file is ``` sliding_window.py ```. Run this file to see the execution of the complete project.
 
-:white_check_mark: The ``` ./cropped ``` folder contains the detected faces and the final image with the bounding boxes before and after applying NMS.
+* The ``` ./cropped ``` folder contains the detected faces and the final image with the bounding boxes before and after applying NMS.
 
 * The ``` ./fam_pictures ``` folder contains the images used to test the model.
 
