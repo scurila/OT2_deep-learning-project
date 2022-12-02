@@ -5,7 +5,7 @@ import torch
 from net import *
 from nms import *
 
-image_path = './fam_pictures/test_fam0.jpg'
+image_path = './fam_pictures/test_fam2.jpg'
 model_path = './models/bootstrap/3ep-iter-2.pth'
 
 winW = 36 # window width
